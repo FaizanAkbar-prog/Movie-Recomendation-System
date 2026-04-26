@@ -1,11 +1,21 @@
 import streamlit as st
 import pickle
 import pandas as pd
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
-# Load data
+# Load movies.pkl
 movies = pickle.load(open('movies.pkl', 'rb'))
-Cos = pickle.load(open('similarity.pkl', 'rb'))  
 
+# Load similarity.pkl if exists, otherwise generate it
+try:
+    Cos = pickle.load(open('similarity.pkl', 'rb'))
+except:
+    cv = CountVectorizer(stop_words='english', max_features=5000)
+    vectors = cv.fit_transform(movies['tags']).toarray()
+    Cos = cosine_similarity(vectors)
+    # Save for next time
+    pickle.dump(Cos, open('similarity.pkl', 'wb'))
 
 # Recommend function
 def recommend(movie):
